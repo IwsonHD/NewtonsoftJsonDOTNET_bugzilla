@@ -1,0 +1,6 @@
+@NewtonsoftJsonDOTNET_bugzilla_HostAddress = http://localhost:5138
+
+GET {{NewtonsoftJsonDOTNET_bugzilla_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
