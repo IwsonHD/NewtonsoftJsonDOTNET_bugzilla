@@ -1,6 +1,6 @@
 ﻿namespace NewtonsoftJsonDOTNET_bugzilla.Models;
 
-public record DefaultAgeRecordPerson(
+public record DefaultNameRecordPerson(
     int Age,
     string Name = "iwo"
 );

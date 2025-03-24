@@ -181,7 +181,7 @@ public class Controller : ControllerBase
         }";
         
         
-        var deserializedJson = Newtonsoft.Json.JsonConvert.DeserializeObject<DefaultAgeRecordPerson>(json);
+        var deserializedJson = Newtonsoft.Json.JsonConvert.DeserializeObject<DefaultNameRecordPerson>(json);
 
         return Ok(deserializedJson);
     }
