@@ -172,4 +172,182 @@ public class Controller : ControllerBase
 
         return Ok(new { deserializedNumbers = properDeserializationOutput, exceptions = exceptions});
     }
+
+    [HttpGet("deserialize-into-record-with-default-value")]
+    public IActionResult DeserializeIntoRecordWithDefaultValue()
+    {
+        var json = @"{
+            'Age': 21        
+        }";
+        
+        
+        var deserializedJson = Newtonsoft.Json.JsonConvert.DeserializeObject<DefaultAgeRecordPerson>(json);
+
+        return Ok(deserializedJson);
+    }
+
+    [HttpGet("benchmarks/serialize/smallObjects")]
+    public IActionResult SerializeSmallObjects([FromQuery]int iterations = 100)
+    {
+        var smallObjects = Enumerable.Range(0, iterations).Select(i => new
+        {
+            Name = "Iwo",
+            Age = i
+        }).ToList();
+    
+        var elapsedTimes = new List<double>();
+        double ticksPerMicrosecond = (double)System.Diagnostics.Stopwatch.Frequency / 1_000_000;
+
+        // Warm-up
+        JsonConvert.SerializeObject(smallObjects);
+
+        var stopwatch = new System.Diagnostics.Stopwatch();
+        // Perform actual benchmarking (10 iterations)
+        for (int i = 0; i < 10; i++)
+        {
+            stopwatch.Restart(); 
+            JsonConvert.SerializeObject(smallObjects);
+            stopwatch.Stop();
+            double microseconds = stopwatch.ElapsedTicks / ticksPerMicrosecond;
+            elapsedTimes.Add(microseconds);
+        }
+
+        return Ok(new {
+            AverageMicroseconds = elapsedTimes.Average(),
+            MinMicroseconds = elapsedTimes.Min(),
+            MaxMicroseconds = elapsedTimes.Max(),
+            AverageMilliseconds = elapsedTimes.Average() / 1000,
+            AllTimesMicroseconds = elapsedTimes
+        });
+    }
+
+   [HttpGet("benchmarks/serialize/largeObjects")]
+public IActionResult SerializeLargeObjects([FromQuery] int iterations = 1000)
+{
+    var largeObjects = Enumerable.Range(0, iterations).Select(i => new
+    {
+        Id = i,
+        Name = $"Item {i}",
+        Description = $"This is a longer description for item {i} with more details to increase the JSON size significantly",
+        CreatedAt = DateTime.Now.AddDays(-i),
+        UpdatedAt = DateTime.Now.AddHours(-i),
+        Properties = new
+        {
+            Color = i % 3 == 0 ? "Red" : i % 3 == 1 ? "Green" : "Blue",
+            Size = i % 5,
+            Tags = new[] { "Tag1", "Tag2", "Tag3", "Tag4" }.Take(i % 4 + 1).ToArray()
+        },
+        Values = Enumerable.Range(1, 10).Select(j => j * i).ToArray()
+    }).ToList();
+    
+    var elapsedTimes = new List<double>();
+    double ticksPerMicrosecond = (double)System.Diagnostics.Stopwatch.Frequency / 1_000_000;
+
+    // Warm-up
+    JsonConvert.SerializeObject(largeObjects);
+
+    var stopwatch = new System.Diagnostics.Stopwatch();
+    // Perform actual benchmarking (10 iterations)
+    for (int i = 0; i < 10; i++)
+    {
+        stopwatch.Restart(); 
+        string json = JsonConvert.SerializeObject(largeObjects);
+        stopwatch.Stop();
+        double microseconds = stopwatch.ElapsedTicks / ticksPerMicrosecond;
+        elapsedTimes.Add(microseconds);
+    }
+
+    return Ok(new {
+        AverageMicroseconds = elapsedTimes.Average(),
+        MinMicroseconds = elapsedTimes.Min(),
+        MaxMicroseconds = elapsedTimes.Max(),
+        AverageMilliseconds = elapsedTimes.Average() / 1000,
+        AllTimesMicroseconds = elapsedTimes
+    });
+}
+
+[HttpGet("benchmarks/deserialize/smallObjects")]
+public IActionResult DeserializeSmallObjects([FromQuery] int iterations = 100)
+{
+    var smallObjects = Enumerable.Range(0, iterations).Select(i => new
+    {
+        Name = "Iwo",
+        Age = i
+    }).ToList();
+    
+    string json = JsonConvert.SerializeObject(smallObjects);
+    
+    var elapsedTimes = new List<double>();
+    double ticksPerMicrosecond = (double)System.Diagnostics.Stopwatch.Frequency / 1_000_000;
+
+    // Warm-up
+    JsonConvert.DeserializeObject<List<dynamic>>(json);
+
+    var stopwatch = new System.Diagnostics.Stopwatch();
+    // Perform actual benchmarking (10 iterations)
+    for (int i = 0; i < 10; i++)
+    {
+        stopwatch.Restart(); 
+        JsonConvert.DeserializeObject<List<dynamic>>(json);
+        stopwatch.Stop();
+        double microseconds = stopwatch.ElapsedTicks / ticksPerMicrosecond;
+        elapsedTimes.Add(microseconds);
+    }
+
+    return Ok(new {
+        AverageMicroseconds = elapsedTimes.Average(),
+        MinMicroseconds = elapsedTimes.Min(),
+        MaxMicroseconds = elapsedTimes.Max(),
+        AverageMilliseconds = elapsedTimes.Average() / 1000,
+        AllTimesMicroseconds = elapsedTimes
+    });
+}
+
+[HttpGet("benchmarks/deserialize/largeObjects")]
+public IActionResult DeserializeLargeObjects([FromQuery] int iterations = 1000)
+{
+    var largeObjects = Enumerable.Range(0, iterations).Select(i => new
+    {
+        Id = i,
+        Name = $"Item {i}",
+        Description = $"This is a longer description for item {i} with more details to increase the JSON size significantly",
+        CreatedAt = DateTime.Now.AddDays(-i),
+        UpdatedAt = DateTime.Now.AddHours(-i),
+        Properties = new
+        {
+            Color = i % 3 == 0 ? "Red" : i % 3 == 1 ? "Green" : "Blue",
+            Size = i % 5,
+            Tags = new[] { "Tag1", "Tag2", "Tag3", "Tag4" }.Take(i % 4 + 1).ToArray()
+        },
+        Values = Enumerable.Range(1, 10).Select(j => j * i).ToArray()
+    }).ToList();
+    
+    string json = JsonConvert.SerializeObject(largeObjects);
+    
+    var elapsedTimes = new List<double>();
+    double ticksPerMicrosecond = (double)System.Diagnostics.Stopwatch.Frequency / 1_000_000;
+
+    // Warm-up
+    JsonConvert.DeserializeObject<List<dynamic>>(json);
+
+    var stopwatch = new System.Diagnostics.Stopwatch();
+    // Perform actual benchmarking (10 iterations)
+    for (int i = 0; i < 10; i++)
+    {
+        stopwatch.Restart(); 
+        JsonConvert.DeserializeObject<List<dynamic>>(json);
+        stopwatch.Stop();
+        double microseconds = stopwatch.ElapsedTicks / ticksPerMicrosecond;
+        elapsedTimes.Add(microseconds);
+    }
+
+    return Ok(new {
+        AverageMicroseconds = elapsedTimes.Average(),
+        MinMicroseconds = elapsedTimes.Min(),
+        MaxMicroseconds = elapsedTimes.Max(),
+        AverageMilliseconds = elapsedTimes.Average() / 1000,
+        AllTimesMicroseconds = elapsedTimes
+    });
+}
+    
 }
